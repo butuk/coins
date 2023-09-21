@@ -7,8 +7,8 @@ export class Scale {
 
   linear(range, from, to) {
     return d3.scaleLinear()
-      .domain(d3.extent(range)) // what data
-      .range([from, to]);       // on what area
+      .domain(d3.extent(range))   // what data
+      .range([from, to]);         // on what scale
   }
 
   log(range, from, to, base) {

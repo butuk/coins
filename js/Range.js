@@ -8,11 +8,11 @@ export class Range {
 
     let all = Object.values(this.data);
 
-    for (let array of all) {
-      for (let item of array) {
+    //for (let array of all) {
+      for (let item of all) {
         parameters.add(item[param]);
       }
-    }
+    //}
 
     return Array.from(parameters);
   }

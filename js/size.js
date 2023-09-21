@@ -1,11 +1,11 @@
 export const size ={
   viz: {
     width: 600,
-    height: 350,
+    height: 400,
   },
   margin: {
     left: 20,
-    top: 0,
+    top: 20,
     right: 0,
     bottom: 25,
   },

@@ -14,24 +14,49 @@ const viz = new SvgGroup('viz').render(svg, size.margin.left, size.margin.top);
 
 
 d3.json(dataPath).then(dataset => {
-  //console.log(dataset);
 
   const coins = Object.keys(dataset);
-  Object.values(dataset).forEach(coin => {
-    coin.map(item => {
+
+  function compareDates(a, b) {
+    if (a.date > b.date) return 1;
+    if (a.date === b.date) return 0;
+    if (a.date < b.date) return -1;
+  }
+
+  const editedData = {};
+  Object.keys(dataset).forEach(coin => {
+    editedData[coin] = dataset[coin]
+      .filter(item => !(item['price_usd'] === null))
+      .map(item => {
       const format = d3.timeParse('%m/%d/%Y');
       item['date'] = format(item['date']);
       item['24h_vol'] = Number(item['24h_vol']);
       item['market_cap'] = Number(item['market_cap']);
       item['price_usd'] = Number(item['price_usd']);
+      return item;
     })
-  });
-  const range = new Range(dataset);
+  })
+
+//----------------
+  const bitcoins = editedData['bitcoin'];
+  bitcoins.sort(compareDates);
+
+
+  console.log(bitcoins);
+
+  const range = new Range(bitcoins);
+
+  viz.append("path")
+    .attr("class", "line")
+    .attr("fill", "none")
+    .attr("stroke", "black")
+    .attr("stroke-width", "2px")
+//--------------
 
   const dateScale = new Scale('linear', range.get('date'), 0, size.viz.width);
   const priceScale = new Scale('linear', range.get('price_usd'), size.viz.height, 0);
 
-  renderViz(dataset['bitcoin'], dateScale, priceScale);
+  renderViz(bitcoins, dateScale, priceScale);
 
 }).catch(error => {
   console.log(error);
