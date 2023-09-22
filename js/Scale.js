@@ -23,4 +23,11 @@ export class Scale {
       .domain(rangeIn)
       .range(rangeOut)
   }
+
+  time(range, from, to) {
+    return d3.scaleTime()
+      .domain(d3.extent(range))
+      .range([from, to])
+      .nice()
+  }
 }
