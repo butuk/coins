@@ -1,5 +1,6 @@
 'use strict';
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
+
 import {Axis} from "./js/Axis.js";
 import {Range} from "./js/Range.js";
 import {Scale} from "./js/Scale.js";
@@ -7,40 +8,45 @@ import {Svg} from "./js/Svg.js";
 import {SvgGroup} from "./js/SvgGroup.js";
 import {Text} from "./js/Text.js";
 import {size} from "./js/size.js";
-
 const dataPath = 'data/coins.json';
-const svg = new Svg(size.totalWidth, size.totalHeight).render('#container');
+const svg = new Svg(size.viz.width, size.viz.height).render('#container');
 const viz = new SvgGroup('viz').render(svg, size.margin.left, size.margin.top);
 
+new Text('Price, $', 'labelY').render(viz, 0, 0)
+new Text('Time', 'labelX').render(viz,(size.width+size.margin.right), size.height);
 
 d3.json(dataPath).then(dataset => {
   const data = filterData(dataset);
 
   const range = new Range(data);
-  const dateScale = new Scale('time', range.get('date'), 0, size.viz.width);
-  const priceScale = new Scale('linear', range.get('price_usd'), size.viz.height, 0);
+  const dateScale = new Scale('time', range.get('date'), 0, size.width);
+  const priceScale = new Scale('linear', range.get('price_usd'), size.height, 0);
 
-  new Axis(dateScale).render(svg, size.margin.left, (size.margin.top), 'top', 11);
-  new Axis(priceScale).render(svg, (size.margin.left + 100),  0, 'left', 11);
+  new Axis(dateScale).render(svg, size.margin.left, (size.margin.top + size.height), 'bottom', 4);
+  new Axis(priceScale).render(svg, size.margin.left,  size.margin.top, 'left', 5);
 
-  renderViz(data, dateScale, priceScale);
+  const bitcoin = data['bitcoin'];
+
+  renderViz(bitcoin, dateScale, priceScale);
 
 }).catch(error => {
   console.log(error);
 })
 
 function filterData(dataset) {
-  Object.values(dataset).forEach(coin => {
-    coin
+  let newDataset = {};
+  Object.keys(dataset).forEach(coin => {
+    newDataset[coin] = dataset[coin]
       .filter(item => !(item['price_usd'] === null))
       .map(item => {
-        item['date'] = d3.timeParse('%m/%d/%Y')(item['date']);
+        item['date'] = d3.timeParse('%d/%m/%Y')(item['date']);
         item['24h_vol'] = Number(item['24h_vol']);
         item['market_cap'] = Number(item['market_cap']);
         item['price_usd'] = Number(item['price_usd']);
+        return item;
       })
   })
-  return dataset;
+  return newDataset;
 }
 
 function renderViz(data, x, y) {
@@ -49,35 +55,6 @@ function renderViz(data, x, y) {
     .y(d => y(d['price_usd']))
 
   viz.append('path')
-    .attr('fill', 'none')
-    .attr('stroke', 'black')
-    .attr('stroke-width', '2px')
+    .classed('line', true)
     .attr('d', line(data));
-}
-
-function filterData2(dataset) {
-  dataset.forEach(item => {
-    const format = d3.timeParse('%Y');
-    item.year = format(item.year);
-  })
-  return dataset;
-}
-
-function renderViz2(data, x, y) {
-
-  const line = d3.line()
-    .x(d => x(d.year))
-    .y(d => y(d.value))
-
-  viz.append('path')
-    .attr('fill', 'none')
-    .attr('stroke', 'black')
-    .attr('stroke-width', '2px')
-    .attr('d', line(data));
-}
-
-function compareDates(a, b) {
-  if (a.date > b.date) return 1;
-  if (a.date === b.date) return 0;
-  if (a.date < b.date) return -1;
 }

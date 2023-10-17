@@ -4,15 +4,15 @@ export const size ={
     height: 400,
   },
   margin: {
-    left: 20,
-    top: 20,
-    right: 0,
+    left: 100,
+    top: 50,
+    right: 20,
     bottom: 25,
   },
-  get totalWidth() {
+  get width() {
     return this.viz.width - this.margin.left - this.margin.right;
   },
-  get totalHeight() {
+  get height() {
     return this.viz.height - this.margin.top - this.margin.bottom;
   }
 }

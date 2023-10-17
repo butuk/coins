@@ -8,6 +8,7 @@ export class Scale {
   linear(range, from, to) {
     return d3.scaleLinear()
       .domain(d3.extent(range))   // what data
+      .nice()
       .range([from, to]);         // on what scale
   }
 
@@ -27,7 +28,7 @@ export class Scale {
   time(range, from, to) {
     return d3.scaleTime()
       .domain(d3.extent(range))
-      .range([from, to])
       .nice()
+      .range([from, to])
   }
 }
