@@ -18,7 +18,7 @@ export class SelectControl {
       this.element.append(item);
     })
     this.listen();
-    return this;
+    return this.element;
   }
 
   listen() {

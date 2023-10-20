@@ -9,11 +9,11 @@ import {Svg} from "./js/Svg.js";
 import {SvgGroup} from "./js/SvgGroup.js";
 import {Text} from "./js/Text.js";
 import {size} from "./js/size.js";
-const controls = document.querySelector('#controls');
 const dataPath = 'data/coins.json';
+const duration = 300;
+
 const svg = new Svg(size.viz.width, size.viz.height).render('#container');
 const viz = new SvgGroup('viz').render(svg, size.margin.left, size.margin.top);
-
 new Text('Price, $', 'labelY').render(viz, 0, 0)
 new Text('Time', 'labelX').render(viz,(size.width+size.margin.right), size.height);
 
@@ -28,13 +28,10 @@ d3.json(dataPath).then(dataset => {
   new Axis(priceScale).render(svg, size.margin.left,  size.margin.top, 'left', 5);
 
   const coinSelect = new SelectControl(Object.keys(data)).render('#controls', formatSelectOption);
-//-------
-  const but = document.querySelector('#container');
-  but.addEventListener('click', () => {
-    console.log(coinSelect.value);
+  coinSelect.addEventListener('change', () => {
+    renderViz(data[coinSelect.value], dateScale, priceScale);
   })
-//-------
-  renderViz(data['bitcoin'], dateScale, priceScale);
+  renderViz(data[Object.keys(data)[0]], dateScale, priceScale);
 
 }).catch(error => {
   console.log(error);
@@ -56,16 +53,22 @@ function filterData(dataset) {
   return newDataset;
 }
 
+function formatSelectOption(optText) {
+  return optText.slice(0,1).toUpperCase() + optText.slice(1);
+}
+
 function renderViz(data, x, y) {
-  const line = d3.line()
+  const t = d3.transition().duration(duration);
+
+  const lineFunction = d3.line()
     .x(d => x(d['date']))
     .y(d => y(d['price_usd']))
 
   viz.append('path')
     .classed('line', true)
-    .attr('d', line(data));
+
+  viz.select('.line')
+    .transition(t)
+      .attr('d', lineFunction(data));
 }
 
-function formatSelectOption(optText) {
-  return optText.slice(0,1).toUpperCase() + optText.slice(1);
-}
