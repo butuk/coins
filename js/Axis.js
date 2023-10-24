@@ -13,21 +13,27 @@ export class Axis {
     the line will be vertical.
     If top or bottom – horizontal.
     */
-    const axisName = 'axis' + type.slice(0,1).toUpperCase() + type.slice(1,type.length);
+    this.ticks = ticks;
+    this.axisName = 'axis' + type.slice(0,1).toUpperCase() + type.slice(1,type.length);
 
-    const axis = d3[`${axisName}`](this.scale)
-      .tickSize(0)
-      .ticks(ticks)
+    this.setScale(this.scale);
 
-    place.append('g')
+    this.axisElement = place.append('g')
       .attr('transform', `translate(${x}, ${y})`)
-      .attr('class', `axis ${axisName}`)
-      .call(axis);
+      .attr('class', `axis ${this.axisName}`)
+      .call(this.axis);
 
     return this;
   }
 
-  update() {
+  update(scale) {
+    this.setScale(scale);
+    this.axisElement.call(this.axis);
+  }
 
+  setScale(scale) {
+    this.axis = d3[`${this.axisName}`](scale)
+      .tickSize(0)
+      .ticks(this.ticks)
   }
 }

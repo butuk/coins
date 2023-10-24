@@ -16,21 +16,29 @@ const svg = new Svg(size.viz.width, size.viz.height).render('#container');
 const viz = new SvgGroup('viz').render(svg, size.margin.left, size.margin.top);
 new Text('Price, $', 'labelY').render(viz, 0, 0)
 new Text('Time', 'labelX').render(viz,(size.width+size.margin.right), size.height);
+let xAxis;
+let yAxis
 
 d3.json(dataPath).then(dataset => {
   const data = filterData(dataset);
-
-  const range = new Range(data);
-  const dateScale = new Scale('time', range.get('date'), 0, size.width);
-  const priceScale = new Scale('linear', range.get('price_usd'), size.height, 0);
-
-  new Axis(dateScale).render(svg, size.margin.left, (size.margin.top + size.height), 'bottom', 4);
-  new Axis(priceScale).render(svg, size.margin.left,  size.margin.top, 'left', 5);
-
   const coinSelect = new SelectControl(Object.keys(data)).render('#controls', formatSelectOption);
+
+  const range = new Range(data[`${coinSelect.value}`]);
+  const dateScale = new Scale('time', range.take('date'), 0, size.width);
+  const priceScale = new Scale('linear', range.take('price_usd'), size.height, 0);
+
+  xAxis = new Axis(dateScale).render(svg, size.margin.left, (size.margin.top + size.height), 'bottom', 4);
+  yAxis = new Axis(priceScale).render(svg, size.margin.left,  size.margin.top, 'left', 5);
+
   coinSelect.addEventListener('change', () => {
+    const range = new Range(data[`${coinSelect.value}`]);
+    const dateScale = new Scale('time', range.take('date'), 0, size.width);
+    const priceScale = new Scale('linear', range.take('price_usd'), size.height, 0);
+    xAxis.update(dateScale);
+    yAxis.update(priceScale);
     renderViz(data[coinSelect.value], dateScale, priceScale);
   })
+
   renderViz(data[Object.keys(data)[0]], dateScale, priceScale);
 
 }).catch(error => {
@@ -58,6 +66,7 @@ function formatSelectOption(optText) {
 }
 
 function renderViz(data, x, y) {
+
   const t = d3.transition().duration(duration);
 
   const lineFunction = d3.line()
